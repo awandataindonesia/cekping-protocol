@@ -1,16 +1,23 @@
 syntax = "proto3";
 
-// WIRE COMPATIBILITY: the proto package ("protocol") and service name ("PingveService")
-// form the gRPC path /protocol.PingveService/Connect used by every deployed agent.
-// Never rename them, and never renumber or reuse field numbers. "Pingve" is the
-// project's early codename (now Cekping).
+// WIRE COMPATIBILITY: the proto package ("protocol") and service names form the gRPC
+// paths agents dial. Never rename them, and never renumber or reuse field numbers.
 package protocol;
 
 option go_package = "github.com/awandataindonesia/cekping-protocol;protocol";
 
-service PingveService {
+// CekpingService is the agent stream: /protocol.CekpingService/Connect.
+service CekpingService {
   // Long-lived bidirectional stream opened by the agent. The first AgentMsg must be
   // an AuthRequest; the server replies with an AuthResponse before sending tasks.
+  rpc Connect(stream AgentMsg) returns (stream ServerMsg);
+}
+
+// Deprecated: legacy path /protocol.PingveService/Connect ("Pingve" is the project's
+// early codename). Identical to CekpingService; servers must keep serving it for
+// agents released before v1.1.0 of this protocol.
+service PingveService {
+  option deprecated = true;
   rpc Connect(stream AgentMsg) returns (stream ServerMsg);
 }
 

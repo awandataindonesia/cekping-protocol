@@ -11,8 +11,24 @@ go get github.com/awandataindonesia/cekping-protocol@latest
 ```go
 import protocol "github.com/awandataindonesia/cekping-protocol"
 
-client := protocol.NewPingveServiceClient(conn)
+client := protocol.NewCekpingServiceClient(conn)
 ```
+
+## Path gRPC
+
+| Service | Path | Status |
+|---|---|---|
+| `CekpingService` | `/protocol.CekpingService/Connect` | Utama, dipakai agent baru |
+| `PingveService` | `/protocol.PingveService/Connect` | Deprecated, untuk agent lama (sebelum protocol v1.1.0) |
+
+Keduanya identik (message sama). Server **wajib mendaftarkan keduanya** ke handler yang sama:
+
+```go
+protocol.RegisterCekpingServiceServer(s, handler)
+protocol.RegisterPingveServiceServer(s, handler) // agent lama
+```
+
+Agent baru memakai `CekpingService`. Jika server menjawab `codes.Unimplemented` (server lama), agent kembali ke `PingveService`.
 
 ## Alur Singkat
 
@@ -25,7 +41,7 @@ client := protocol.NewPingveServiceClient(conn)
 
 Agent sudah terpasang di banyak mesin volunteer, jadi perubahan harus selalu **backward-compatible**:
 
-- **Jangan** mengganti `package protocol` atau nama service `PingveService`. Keduanya membentuk path gRPC `/protocol.PingveService/Connect`. ("Pingve" adalah codename awal proyek.)
+- **Jangan** mengganti `package protocol` atau nama service `CekpingService` / `PingveService`. Keduanya membentuk path gRPC yang di-dial agent. ("Pingve" adalah codename awal proyek.) `PingveService` baru boleh dihapus jika sudah tidak ada agent lama yang terkoneksi.
 - **Jangan** mengubah atau memakai ulang nomor field. Field yang dihapus harus di-`reserved`.
 - Menambah field / message / varian `oneof` baru aman.
 

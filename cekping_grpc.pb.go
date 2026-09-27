@@ -4,10 +4,8 @@
 // - protoc             v6.33.4
 // source: cekping.proto
 
-// WIRE COMPATIBILITY: the proto package ("protocol") and service name ("PingveService")
-// form the gRPC path /protocol.PingveService/Connect used by every deployed agent.
-// Never rename them, and never renumber or reuse field numbers. "Pingve" is the
-// project's early codename (now Cekping).
+// WIRE COMPATIBILITY: the proto package ("protocol") and service names form the gRPC
+// paths agents dial. Never rename them, and never renumber or reuse field numbers.
 
 package protocol
 
@@ -24,15 +22,123 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	CekpingService_Connect_FullMethodName = "/protocol.CekpingService/Connect"
+)
+
+// CekpingServiceClient is the client API for CekpingService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// CekpingService is the agent stream: /protocol.CekpingService/Connect.
+type CekpingServiceClient interface {
+	// Long-lived bidirectional stream opened by the agent. The first AgentMsg must be
+	// an AuthRequest; the server replies with an AuthResponse before sending tasks.
+	Connect(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AgentMsg, ServerMsg], error)
+}
+
+type cekpingServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewCekpingServiceClient(cc grpc.ClientConnInterface) CekpingServiceClient {
+	return &cekpingServiceClient{cc}
+}
+
+func (c *cekpingServiceClient) Connect(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AgentMsg, ServerMsg], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CekpingService_ServiceDesc.Streams[0], CekpingService_Connect_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[AgentMsg, ServerMsg]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CekpingService_ConnectClient = grpc.BidiStreamingClient[AgentMsg, ServerMsg]
+
+// CekpingServiceServer is the server API for CekpingService service.
+// All implementations must embed UnimplementedCekpingServiceServer
+// for forward compatibility.
+//
+// CekpingService is the agent stream: /protocol.CekpingService/Connect.
+type CekpingServiceServer interface {
+	// Long-lived bidirectional stream opened by the agent. The first AgentMsg must be
+	// an AuthRequest; the server replies with an AuthResponse before sending tasks.
+	Connect(grpc.BidiStreamingServer[AgentMsg, ServerMsg]) error
+	mustEmbedUnimplementedCekpingServiceServer()
+}
+
+// UnimplementedCekpingServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedCekpingServiceServer struct{}
+
+func (UnimplementedCekpingServiceServer) Connect(grpc.BidiStreamingServer[AgentMsg, ServerMsg]) error {
+	return status.Error(codes.Unimplemented, "method Connect not implemented")
+}
+func (UnimplementedCekpingServiceServer) mustEmbedUnimplementedCekpingServiceServer() {}
+func (UnimplementedCekpingServiceServer) testEmbeddedByValue()                        {}
+
+// UnsafeCekpingServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CekpingServiceServer will
+// result in compilation errors.
+type UnsafeCekpingServiceServer interface {
+	mustEmbedUnimplementedCekpingServiceServer()
+}
+
+func RegisterCekpingServiceServer(s grpc.ServiceRegistrar, srv CekpingServiceServer) {
+	// If the following call panics, it indicates UnimplementedCekpingServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&CekpingService_ServiceDesc, srv)
+}
+
+func _CekpingService_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CekpingServiceServer).Connect(&grpc.GenericServerStream[AgentMsg, ServerMsg]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CekpingService_ConnectServer = grpc.BidiStreamingServer[AgentMsg, ServerMsg]
+
+// CekpingService_ServiceDesc is the grpc.ServiceDesc for CekpingService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var CekpingService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "protocol.CekpingService",
+	HandlerType: (*CekpingServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Connect",
+			Handler:       _CekpingService_Connect_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "cekping.proto",
+}
+
+const (
 	PingveService_Connect_FullMethodName = "/protocol.PingveService/Connect"
 )
 
 // PingveServiceClient is the client API for PingveService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Deprecated: legacy path /protocol.PingveService/Connect ("Pingve" is the project's
+// early codename). Identical to CekpingService; servers must keep serving it for
+// agents released before v1.1.0 of this protocol.
+//
+// Deprecated: Do not use.
 type PingveServiceClient interface {
-	// Long-lived bidirectional stream opened by the agent. The first AgentMsg must be
-	// an AuthRequest; the server replies with an AuthResponse before sending tasks.
 	Connect(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AgentMsg, ServerMsg], error)
 }
 
@@ -40,6 +146,7 @@ type pingveServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
+// Deprecated: Do not use.
 func NewPingveServiceClient(cc grpc.ClientConnInterface) PingveServiceClient {
 	return &pingveServiceClient{cc}
 }
@@ -60,9 +167,13 @@ type PingveService_ConnectClient = grpc.BidiStreamingClient[AgentMsg, ServerMsg]
 // PingveServiceServer is the server API for PingveService service.
 // All implementations must embed UnimplementedPingveServiceServer
 // for forward compatibility.
+//
+// Deprecated: legacy path /protocol.PingveService/Connect ("Pingve" is the project's
+// early codename). Identical to CekpingService; servers must keep serving it for
+// agents released before v1.1.0 of this protocol.
+//
+// Deprecated: Do not use.
 type PingveServiceServer interface {
-	// Long-lived bidirectional stream opened by the agent. The first AgentMsg must be
-	// an AuthRequest; the server replies with an AuthResponse before sending tasks.
 	Connect(grpc.BidiStreamingServer[AgentMsg, ServerMsg]) error
 	mustEmbedUnimplementedPingveServiceServer()
 }
@@ -87,6 +198,7 @@ type UnsafePingveServiceServer interface {
 	mustEmbedUnimplementedPingveServiceServer()
 }
 
+// Deprecated: Do not use.
 func RegisterPingveServiceServer(s grpc.ServiceRegistrar, srv PingveServiceServer) {
 	// If the following call panics, it indicates UnimplementedPingveServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an

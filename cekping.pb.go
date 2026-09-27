@@ -4,10 +4,8 @@
 // 	protoc        v6.33.4
 // source: cekping.proto
 
-// WIRE COMPATIBILITY: the proto package ("protocol") and service name ("PingveService")
-// form the gRPC path /protocol.PingveService/Connect used by every deployed agent.
-// Never rename them, and never renumber or reuse field numbers. "Pingve" is the
-// project's early codename (now Cekping).
+// WIRE COMPATIBILITY: the proto package ("protocol") and service names form the gRPC
+// paths agents dial. Never rename them, and never renumber or reuse field numbers.
 
 package protocol
 
@@ -1011,9 +1009,11 @@ const file_cekping_proto_rawDesc = "" +
 	"\n" +
 	"raw_output\x18\x03 \x01(\tR\trawOutput\x12\"\n" +
 	"\x03hop\x18\x04 \x01(\v2\x10.protocol.MTRHopR\x03hop\x12\x19\n" +
-	"\bis_final\x18\x05 \x01(\bR\aisFinal2G\n" +
+	"\bis_final\x18\x05 \x01(\bR\aisFinal2H\n" +
+	"\x0eCekpingService\x126\n" +
+	"\aConnect\x12\x12.protocol.AgentMsg\x1a\x13.protocol.ServerMsg(\x010\x012L\n" +
 	"\rPingveService\x126\n" +
-	"\aConnect\x12\x12.protocol.AgentMsg\x1a\x13.protocol.ServerMsg(\x010\x01B8Z6github.com/awandataindonesia/cekping-protocol;protocolb\x06proto3"
+	"\aConnect\x12\x12.protocol.AgentMsg\x1a\x13.protocol.ServerMsg(\x010\x01\x1a\x03\x88\x02\x01B8Z6github.com/awandataindonesia/cekping-protocol;protocolb\x06proto3"
 
 var (
 	file_cekping_proto_rawDescOnce sync.Once
@@ -1051,10 +1051,12 @@ var file_cekping_proto_depIdxs = []int32{
 	8,  // 6: protocol.ServerMsg.mtr_task:type_name -> protocol.MTRTask
 	2,  // 7: protocol.ServerMsg.cancel_task:type_name -> protocol.CancelTask
 	9,  // 8: protocol.MTRResult.hop:type_name -> protocol.MTRHop
-	0,  // 9: protocol.PingveService.Connect:input_type -> protocol.AgentMsg
-	1,  // 10: protocol.PingveService.Connect:output_type -> protocol.ServerMsg
-	10, // [10:11] is the sub-list for method output_type
-	9,  // [9:10] is the sub-list for method input_type
+	0,  // 9: protocol.CekpingService.Connect:input_type -> protocol.AgentMsg
+	0,  // 10: protocol.PingveService.Connect:input_type -> protocol.AgentMsg
+	1,  // 11: protocol.CekpingService.Connect:output_type -> protocol.ServerMsg
+	1,  // 12: protocol.PingveService.Connect:output_type -> protocol.ServerMsg
+	11, // [11:13] is the sub-list for method output_type
+	9,  // [9:11] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name
@@ -1085,7 +1087,7 @@ func file_cekping_proto_init() {
 			NumEnums:      0,
 			NumMessages:   11,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_cekping_proto_goTypes,
 		DependencyIndexes: file_cekping_proto_depIdxs,
