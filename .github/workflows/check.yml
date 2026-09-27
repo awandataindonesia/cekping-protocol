@@ -1,0 +1,29 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  generated-code:
+    name: Generated code is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install protoc
+        run: |
+          PROTOC_VERSION=$(sed -n 's/^PROTOC_VERSION *:= *//p' Makefile)
+          curl -sSL -o /tmp/protoc.zip "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+          sudo unzip -qo /tmp/protoc.zip -d /usr/local bin/protoc 'include/*'
+
+      - name: Install plugins
+        run: make tools && echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - run: make check
+      - run: go build ./... && go vet ./...
